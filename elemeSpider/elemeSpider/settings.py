@@ -47,7 +47,7 @@ ROBOTSTXT_OBEY = False
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    'elemeSpider.middlewares.ElemespiderSpiderMiddleware': 543,
+#     'elemeSpider.middlewares.HttpError.HttpErrorMiddleware' : 305,
 # }
 
 # Enable or disable downloader middlewares
@@ -56,8 +56,9 @@ DOWNLOADER_MIDDLEWARES = {
     # 'elemeSpider.middlewares.ElemespiderDownloaderMiddleware': 543,
     'elemeSpider.middlewares.customUserCookie.RandomCookie': 300,
     'elemeSpider.middlewares.customUserAgent.RandomUserAgent': 301,
-    # 'elemeSpider.middlewares.customUserProxy.RandomProxy': 302,
+    'elemeSpider.middlewares.customUserProxy.RandomProxy': 302,
     'elemeSpider.middlewares.customDownloadDelay.RandomDelay': 303,
+    'elemeSpider.middlewares.HttpError.HttpErrorMiddleware' : 305,
 }
 
 # Enable or disable extensions
@@ -92,3 +93,5 @@ DOWNLOADER_MIDDLEWARES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+HTTPERROR_ALLOWED_CODES = [403, 404]
+RETRY_TIMES = 0

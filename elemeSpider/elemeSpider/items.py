@@ -32,9 +32,10 @@ class ShopInfoItem(scrapy.Item):
         """
         判断商铺ID是否存在
         """
-        print(self['shop_id'])
         row = cursor.execute(
             "SELECT * FROM tb_eleme_shop WHERE shop_id = '{}' limit 1".format(self['shop_id']))
+        if row:
+            print(self['shop_id'])
         return row
 
     def Save_data(self):
@@ -49,7 +50,6 @@ class ShopInfoItem(scrapy.Item):
             db.commit()
         except BaseException as e:
             print(e)
-        return
 
 
 class FoodInfoItem(scrapy.Item):
@@ -84,4 +84,3 @@ class FoodInfoItem(scrapy.Item):
             db.commit()
         except BaseException as e:
             print(e)
-        return
