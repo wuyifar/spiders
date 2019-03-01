@@ -13,7 +13,7 @@ class RandomProxy(object):
             proxy = r.randomkey()
             request.meta['proxy'] = 'https://{}'.format(proxy)
         else:
-            response = requests.get('http://api.xdaili.cn/xdaili-api//greatRecharge/getGreatIp?spiderId=773ad987cd9245f59eb722d74a23485f&orderno=YZ20192280527JenWDX&returnType=2&count=1')
+            response = requests.get('http://api.xdaili.cn/xdaili-api//greatRecharge/getGreatIp?spiderId=773ad987cd9245f59eb722d74a23485f&orderno=YZ20193115018tWxk6&returnType=2&count=1')
             data = json.loads(response.text)
             results= data['RESULT']
             for result in results:

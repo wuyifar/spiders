@@ -3,15 +3,19 @@ import scrapy
 import json
 import pymysql
 from elemeSpider.items import ShopInfoItem, FoodInfoItem
+import redis
 
 db = pymysql.connect('10.102.24.254', 'wuyifa', 'wuyifa1234', 'lifeplus')
 cursor = db.cursor()
 
+pool = redis.ConnectionPool(
+    host='localhost', port=6379, decode_responses=True, db=1)
+r = redis.Redis(connection_pool=pool)
 
 class ElemeSpider(scrapy.Spider):
     name = 'eleme'
     allowed_domains = ['www.ele.me']
-    start_urls = ['https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wk6wepfvne2q&latitude=25.092277&longitude=104.901517&offset=24&terminal=web']
+    start_urls = ['https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wkezmjyb91xd&latitude=26.618594&limit=24&longitude=106.752487&offset=96&terminal=web']
     offset = 24
 
     def parse(self, response):
@@ -20,7 +24,7 @@ class ElemeSpider(scrapy.Spider):
             return
         for shop in shop_list:
             item = ShopInfoItem()
-            item['shop_id'] = shop['id']
+            item['shop_id'] = shop['authentic_id']
             item['shop_address'] = shop['address']
             item['shop_latitude'] = shop['latitude']
             item['shop_longitude'] = shop['longitude']
@@ -28,12 +32,14 @@ class ElemeSpider(scrapy.Spider):
             item['shop_description'] = shop['piecewise_agent_fee']['rules'][0]['fee']
             item['shop_sending_price'] = shop['piecewise_agent_fee']['rules'][0]['price']
             item['shop_order_lead_time'] = shop['order_lead_time']
+            shop_id = shop['id']
             row = item.Judge_Id()
             if row:
                 continue
             item.Save_data()
+            r.set(shop_id, item['shop_id'])
             url = 'https://www.ele.me/restapi/shopping/v2/menu?restaurant_id={}&terminal=web'.format(
-                item['shop_id'])
+                shop_id)
             yield scrapy.Request(url, callback=self.food_parse)
         url2 = 'https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wk6wdzye9x30&latitude=25.09204&limit=24&longitude=104.895467&offset={}&terminal=web'.format(
             self.offset)
@@ -60,5 +66,5 @@ class ElemeSpider(scrapy.Spider):
                 item['packing_fee'] = food['specfoods'][0]['packing_fee']
                 item['month_sales'] = food['month_sales']
                 item['description'] = food['description']
-                item['restaurant_id'] = food['restaurant_id']
+                item['restaurant_id'] = r.get(food['restaurant_id'])
                 item.Save_data()
