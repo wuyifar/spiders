@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'elemeSpider.spiders'
 #USER_AGENT = 'elemeSpider (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = False
+ROBOTSTXT_OBEY = False  #  关闭对于robots.txt的处理
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -94,6 +94,6 @@ DOWNLOADER_MIDDLEWARES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-HTTPERROR_ALLOWED_CODES = [403, 404]
-RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 408, 403, 404]
+HTTPERROR_ALLOWED_CODES = [403, 404]  #  设置对于响应响应码的处理
+RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 408, 403, 404]   # 设置重试的相应码
 RETRY_TIMES = 1

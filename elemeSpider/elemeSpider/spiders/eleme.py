@@ -11,18 +11,20 @@ cursor = db.cursor()
 pool = redis.ConnectionPool(
     host='localhost', port=6379, decode_responses=True, db=1)
 r = redis.Redis(connection_pool=pool)
+start_url = 'https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wkezmjyb91xd&latitude=26.618594&limit=24&longitude=106.752487&offset={}&terminal=web'
+
 
 class ElemeSpider(scrapy.Spider):
     name = 'eleme'
     allowed_domains = ['www.ele.me']
-    start_urls = ['https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wkezmjyb91xd&latitude=26.618594&limit=24&longitude=106.752487&offset=0&terminal=web']
+    start_urls = [start_url.format(0)]
     offset = 24
 
     def parse(self, response):
         """
         商铺接口返回响应处理
         """
-        shop_list = json.loads(response.text)
+        shop_list = json.loads(response.text)  # 将返回的json字符串转化为Python的数据类型
         if not len(shop_list):
             return
         for shop in shop_list:
@@ -36,28 +38,28 @@ class ElemeSpider(scrapy.Spider):
             item['shop_sending_price'] = shop['piecewise_agent_fee']['rules'][0]['price']
             item['shop_order_lead_time'] = shop['order_lead_time']
             shop_id = shop['id']
-            row = item.Judge_Id()  # 判断商家是否已存在
+            row = item.Judge_Id()  # 判断商铺在数据库是否已存在
             if row:
                 continue
-            item.Save_data()  # 商品保存
+            item.Save_data()  # 商铺保存
             r.set(shop_id, item['shop_id'])
             url = 'https://www.ele.me/restapi/shopping/v2/menu?restaurant_id={}&terminal=web'.format(
                 shop_id)  # 商品接口的拼接
             yield scrapy.Request(url, callback=self.food_parse)  # 返回新的商品接口
-        url2 = 'https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wkezmjyb91xd&latitude=26.618594&limit=24&longitude=106.752487&offset={}&terminal=web'.format(
+        url2 = start_url.format(
             self.offset)  # 新的商铺接口拼接
         yield scrapy.Request(url2, callback=self.parse)  # 返回新的商铺接口
         self.offset += 24
 
     def food_parse(self, response):
-        food_list = json.loads(response.text)
+        food_list = json.loads(response.text)  # 将返回的json字符串转化为Python的数据类型
         item = FoodInfoItem()
         for category in food_list:
             foods = category['foods']
             item['category_name'] = category['name']
             for food in foods:
                 item['food_id'] = food['specfoods'][0]['food_id']
-                row = item.Judge_Id()
+                row = item.Judge_Id()  # 判断商品在数据库是否已存在
                 if row:
                     continue
                 item['food_name'] = food['specfoods'][0]['name']
@@ -73,4 +75,4 @@ class ElemeSpider(scrapy.Spider):
                 item['month_sales'] = food['month_sales']
                 item['description'] = food['description']
                 item['restaurant_id'] = r.get(food['restaurant_id'])
-                item.Save_data()
+                item.Save_data()  # 商品保存

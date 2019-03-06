@@ -8,6 +8,9 @@ r = redis.Redis(connection_pool=pool)
 
 
 class RandomProxy(object):
+    """
+    请求接口前添加代理IP
+    """
     def process_request(self, request, spider):
         print('运行代理管理模块')
         if r.randomkey():

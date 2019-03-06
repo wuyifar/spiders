@@ -15,6 +15,7 @@ class HttpErrorMiddleware(object):
         print('打印现在的状态码{}'.format(response.status))
         print(request.cookies)
         if response.status < 200 or response.status > 300:
+            #  当响应不在200 - 300时执行
             pool = redis.ConnectionPool(
                 host='localhost', port=6379, decode_responses=True, db=0)
             r = redis.Redis(connection_pool=pool)
@@ -24,12 +25,13 @@ class HttpErrorMiddleware(object):
             except BaseException as e:
                 print('当前的IP已经不存在')
             print('相应状态码不正常')
-        set_cookies = response.headers.getlist('Set-Cookie')
+        set_cookies = response.headers.getlist('Set-Cookie')  #  获取当前响应是否设置新Cookie
         try:
             set_cookies_str = set_cookies[0].decode()
         except BaseException as e:
             print('当前接口没有设置cookie')
             return response
+        #  更改当前的的Cookie，进行下一次请求
         set_cookie_list = set_cookies_str.split('; ')
         a, b = set_cookie_list[0].split('=')
         USERID = request.cookies['USERID']
@@ -47,6 +49,10 @@ class HttpErrorMiddleware(object):
         return response
 
     def process_exception(self, request, exception, spider):
+        """
+        响应异常时的处理方法
+        """
+        #  设置异常列表，如果异常不在列表中就不进行处理
         ALL_EXCEPTIONS = (defer.TimeoutError, TimeoutError, DNSLookupError,
                           ConnectionRefusedError, ConnectionDone, ConnectError,
                           ConnectionLost, TCPTimedOutError, ResponseFailed,
