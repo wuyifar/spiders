@@ -30,12 +30,12 @@ class ShopInfoItem(scrapy.Item):
 
     def Judge_Id(self):
         """
-        判断商铺ID是否存在
+        判断商铺名称是否存在
         """
         row = cursor.execute(
-            "SELECT * FROM tb_eleme_shop WHERE shop_id = '{}' limit 1".format(self['shop_id']))
+            "SELECT * FROM tb_eleme_shop WHERE shop_name = '{}' limit 1".format(self['shop_name']))
         if row:
-            print(self['shop_id'])
+            print(self['shop_name'])
         return row
 
     def Save_data(self):

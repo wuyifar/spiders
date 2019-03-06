@@ -15,10 +15,13 @@ r = redis.Redis(connection_pool=pool)
 class ElemeSpider(scrapy.Spider):
     name = 'eleme'
     allowed_domains = ['www.ele.me']
-    start_urls = ['https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wkezmjyb91xd&latitude=26.618594&limit=24&longitude=106.752487&offset=96&terminal=web']
+    start_urls = ['https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wkezmjyb91xd&latitude=26.618594&limit=24&longitude=106.752487&offset=0&terminal=web']
     offset = 24
 
     def parse(self, response):
+        """
+        商铺接口返回响应处理
+        """
         shop_list = json.loads(response.text)
         if not len(shop_list):
             return
@@ -33,18 +36,18 @@ class ElemeSpider(scrapy.Spider):
             item['shop_sending_price'] = shop['piecewise_agent_fee']['rules'][0]['price']
             item['shop_order_lead_time'] = shop['order_lead_time']
             shop_id = shop['id']
-            row = item.Judge_Id()
+            row = item.Judge_Id()  # 判断商家是否已存在
             if row:
                 continue
-            item.Save_data()
+            item.Save_data()  # 商品保存
             r.set(shop_id, item['shop_id'])
             url = 'https://www.ele.me/restapi/shopping/v2/menu?restaurant_id={}&terminal=web'.format(
-                shop_id)
-            yield scrapy.Request(url, callback=self.food_parse)
-        url2 = 'https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wk6wdzye9x30&latitude=25.09204&limit=24&longitude=104.895467&offset={}&terminal=web'.format(
-            self.offset)
+                shop_id)  # 商品接口的拼接
+            yield scrapy.Request(url, callback=self.food_parse)  # 返回新的商品接口
+        url2 = 'https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wkezmjyb91xd&latitude=26.618594&limit=24&longitude=106.752487&offset={}&terminal=web'.format(
+            self.offset)  # 新的商铺接口拼接
+        yield scrapy.Request(url2, callback=self.parse)  # 返回新的商铺接口
         self.offset += 24
-        yield scrapy.Request(url2, callback=self.parse)
 
     def food_parse(self, response):
         food_list = json.loads(response.text)
@@ -60,7 +63,10 @@ class ElemeSpider(scrapy.Spider):
                 item['food_name'] = food['specfoods'][0]['name']
                 item['category_id'] = food['category_id']
                 item['food_price'] = food['specfoods'][0]['price']
-                item['original_price'] = food['specfoods'][0]['original_price']
+                try:
+                    item['original_price'] = food['specfoods'][0]['original_price']
+                except BaseException as e:
+                    item['original_price'] = 0
                 if not item['original_price']:
                     item['original_price'] = 0
                 item['packing_fee'] = food['specfoods'][0]['packing_fee']

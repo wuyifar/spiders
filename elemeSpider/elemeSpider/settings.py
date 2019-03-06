@@ -58,7 +58,8 @@ DOWNLOADER_MIDDLEWARES = {
     'elemeSpider.middlewares.customUserAgent.RandomUserAgent': 301,
     'elemeSpider.middlewares.customUserProxy.RandomProxy': 302,
     'elemeSpider.middlewares.customDownloadDelay.RandomDelay': 303,
-    'elemeSpider.middlewares.HttpError.HttpErrorMiddleware' : 305,
+    'elemeSpider.middlewares.HttpError.HttpErrorMiddleware': 305,
+    'elemeSpider.middlewares.customReTry.DiyRetryMiddleware': 306,
 }
 
 # Enable or disable extensions
@@ -94,4 +95,5 @@ DOWNLOADER_MIDDLEWARES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 HTTPERROR_ALLOWED_CODES = [403, 404]
+RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 408, 403, 404]
 RETRY_TIMES = 1
