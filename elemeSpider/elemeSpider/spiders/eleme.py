@@ -11,7 +11,7 @@ cursor = db.cursor()
 pool = redis.ConnectionPool(
     host='localhost', port=6379, decode_responses=True, db=1)
 r = redis.Redis(connection_pool=pool)
-start_url = 'https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wkezmjyb91xd&latitude=26.618594&limit=24&longitude=106.752487&offset={}&terminal=web'
+start_url = 'https://www.ele.me/restapi/shopping/restaurants?extras%5B%5D=activities&geohash=wk6wu90m9ujs&latitude=25.099233&limit=24&longitude=104.963805&offset={}&terminal=web'
 
 
 class ElemeSpider(scrapy.Spider):
